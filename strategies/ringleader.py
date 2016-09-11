@@ -1,8 +1,9 @@
-from prisonerlib import Light_bulb, Prisoner, PRISONERS_AMOUNT
+import prisonerlib
+from prisonerlib import Light_bulb, PRISONERS_AMOUNT
 
-class RingLeader(Prisoner):
+class Prisoner(prisonerlib.Prisoner):
     def __init__(self, *args, **kwargs):
-        super(RingLeader, self).__init__(*args, **kwargs)
+        super(Prisoner, self).__init__(*args, **kwargs)
         if self.pid:
             self.__has_acted = False
         else:
