@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from random import randint, choice
+import random
 from prisonerslib import Light_bulb, RingLeader, PRISONERS_AMOUNT
 
 
@@ -15,7 +15,7 @@ def main():
     # simulate
     light_bulb = Light_bulb()
     day = 0
-    while not choice(prisoners).visit(light_bulb, day):
+    while not random.choice(prisoners).visit(light_bulb, day):
         day += 1
 
     print('Solved in {:.2f} years.'.format(day / 365.25))
