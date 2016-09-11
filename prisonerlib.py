@@ -1,7 +1,7 @@
 PRISONERS_AMOUNT = 100
 
 
-class Light_bulb:
+class LightBulb:
     def __init__(self):
         self.on = False
 
