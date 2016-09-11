@@ -1,4 +1,4 @@
-PRISONERS_AMOUNT = 100
+NUM_PRISONERS = 100
 
 
 class LightBulb:
