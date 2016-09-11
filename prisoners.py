@@ -17,7 +17,7 @@ def main():
         prisoners.append(mod.Prisoner(i))
 
     # simulate
-    light_bulb = Light_bulb()
+    light_bulb = LightBulb()
     day = 0
     while not choice(prisoners).visit(light_bulb, day):
         day += 1
