@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
+import importlib
+import strategies
 from random import choice
-from temp import Light_bulb, RingLeader, PRISONERS_AMOUNT
+from prisonerlib import Light_bulb, PRISONERS_AMOUNT
 
 
 def main():
 
+    # TODO: Accept from argument
+    strategy_name = 'ringleader'
+    mod = importlib.import_module('.' + strategy_name, 'strategies')
+
     # build list
     prisoners = []
     for i in range(PRISONERS_AMOUNT):
-        # CREATE PRISONERS WITH YOUR STRATEGY HERE
-        p = RingLeader(i)
-        prisoners.append(p)
+        prisoners.append(mod.Prisoner(i))
 
     # simulate
     light_bulb = Light_bulb()
