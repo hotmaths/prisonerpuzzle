@@ -1,33 +1,38 @@
 from random import randint
+PRISONERS_AMOUNT = 100
 
-PRISONER_COUNT = 100
-TIME = 10000 # for limits
 
 class Prisoner:
-    def __init__(self, wait=0, visits=0, has_acted=False):
-        self.wait = wait
-        self.visits = visits
-        self.has_acted = has_acted
 
-    # WAIT ----------------------
-    @property
     def wait(self):
-        return self.__wait
+        return NotImplementedError
 
-    @wait.setter
-    def wait(self, days):
-        self.__wait = days
+    def visit(self):
+        return NotImplementedError
 
-    # VISITS ---------------------
+
+# SUBCLASSES ARE STRATEGIES
+class RingLeader(Prisoner):
+    count_for_ID = 0
+
+    def __init__(self, has_acted=False, count=1):
+        self.__id = RingLeader.count_for_ID
+        RingLeader.count_for_ID += 1
+        self.__has_acted = has_acted
+        if self.__id == 0:
+            self.__role = 1
+        else:
+            self.__role = 0
+        self.__count = count
+
     @property
-    def visits(self):
-        return self.__visits
+    def id(self):
+        return self.__id
 
-    @visits.setter
-    def visits(self, num):
-        self.__visits = num
+    @id.setter
+    def id(self, count):
+        self.__id = count
 
-    # HAS_ACTED ------------------
     @property
     def has_acted(self):
         return self.__has_acted
@@ -36,28 +41,9 @@ class Prisoner:
     def has_acted(self, bool):
         self.__has_acted = bool
 
-
-    # DUTY (CUSTOMIZE LATER)-------------------
-    def duty(self, bulb):
-        if bulb == 0 and not self.has_acted:
-            bulb = 1
-            self.has_acted = True
-        return bulb
-
-    # MUTATORS ---------------------
-    def decrement_wait(self):
-        self.__wait -= 1
-
-    def increment_visits(self):
-        self.__visits += 1
-
-
-
-class Leader(Prisoner):
-    def __init__(self, wait=0, visits=0, count=1):
-        self.wait = wait
-        self.visits = visits
-        self.count = count
+    @property
+    def role(self):
+        return self.__role
 
     @property
     def count(self):
@@ -67,42 +53,43 @@ class Leader(Prisoner):
     def count(self, num):
         self.__count = num
 
-    def duty(self, bulb):
-        if bulb == 1:
-            bulb = 0
-            self.__count += 1
-        return bulb
+    def duty(self, bulb, day):
+        if self.role:
+            if bulb == 1:
+                bulb = 0
+                self.__count += 1
+            return bulb
+        else:
+            if bulb == 0 and not self.__has_acted:
+                bulb = 1
+                self.__has_acted = True
+            return bulb
+
+    def query_victory(self):
+        if self.role:
+            if self.__count == PRISONERS_AMOUNT:
+                return True
+        return False
+
 
 def main():
 
-    # generates prisoner list
+    # build list
     prisoner_list = []
-    leader_count = 1
-    for i in range(PRISONER_COUNT):
-        if leader_count:
-            prisoner = Leader()
-            leader_count -= 1
-        else:
-            prisoner = Prisoner()
-        prisoner_list.append(prisoner)
+    for i in range(PRISONERS_AMOUNT):
+        # CREATE PRISONERS WITH YOUR STRATEGY HERE
+        p = RingLeader()
+        prisoner_list.append(p)
 
-    leader = prisoner_list[0]
-
+    victory = False
     light_bulb = 0
     days = 0
-    while leader.count < PRISONER_COUNT:
-        prisoner = prisoner_list[randint(0, PRISONER_COUNT - 1)]
-        prisoner.increment_visits()
-        light_bulb = prisoner.duty(light_bulb)
+    while not victory:
+        random_prisoner = prisoner_list[randint(0, PRISONERS_AMOUNT - 1)]
+        light_bulb = random_prisoner.duty(light_bulb, days)
+        victory = random_prisoner.query_victory()
         days += 1
-
-    visit_total = 0
-    for p in prisoner_list:
-        if isinstance(p, Leader):
-            print('Leader counted:', p.count)
-        visit_total += p.visits
-    print('Average visits:', visit_total / PRISONER_COUNT)
-    print('Days passed:', days)
+    print("Solved in ", days, 'days.')
 
 
 main()
