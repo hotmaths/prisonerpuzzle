@@ -1,4 +1,4 @@
-from prisonerslib import Light_bulb, Prisoner, PRISONERS_AMOUNT
+from prisonerlib import Light_bulb, Prisoner, PRISONERS_AMOUNT
 
 class RingLeader(Prisoner):
     def __init__(self, *args, **kwargs):
