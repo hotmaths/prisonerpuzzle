@@ -1,28 +1,43 @@
 #!/usr/bin/env python3
-import importlib
+from importlib import import_module
+from pkgutil import iter_modules
 import strategies
-import random
-from prisonerlib import LightBulb, NUM_PRISONERS
+import argparse
+from prisonerlib import Simulation, RUNS
+
+
+# for list argument
+def print_strategies():
+    temp = iter_modules(['strategies'])
+    strategy_list = []
+    for each in temp:
+        strategy_list.append(each[1])
+    return strategy_list
 
 
 def main():
 
-    # TODO: Accept from argument
-    strategy_name = 'collectiveconsciousness'
-    mod = importlib.import_module('.' + strategy_name, 'strategies')
+    # ARGPARSE
+    parser = argparse.ArgumentParser(description='Strategy input.')
+    parser.add_argument('strategy', choices=print_strategies(), help='Enter a strategy.')
 
-    # build list
-    prisoners = []
-    for i in range(NUM_PRISONERS):
-        prisoners.append(mod.Prisoner(i))
+    args = parser.parse_args()
 
-    # simulate
-    light_bulb = LightBulb()
-    day = 0
-    while not random.choice(prisoners).visit(light_bulb, day):
-        day += 1
+    strategy = args.strategy
 
-    print('Solved in {:.2f} years.'.format(day / 365.25))
+    mod = import_module('.' + strategy, 'strategies')
+
+    s = Simulation(strategy, mod)
+    s.run()
+
+    s_max, s_min, s_avg = s.run_times
+
+    # print results
+    print('\n{}:'.format(strategy))
+    print('\tRUNS: {}'.format(RUNS))
+    print('\tAVG: {:.2f} YEARS'.format(s_avg))
+    print('\tMIN: {:.2f} YEARS'.format(s_min))
+    print('\tMAX: {:.2f} YEARS'.format(s_max))
 
 
 main()
