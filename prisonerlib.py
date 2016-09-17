@@ -1,5 +1,13 @@
+from pkgutil import iter_modules
+from random import choice
+import threading
+import time
+
+# generates available strategies for argparse choices
+STRATEGIES = [mod[1] for mod in iter_modules(['strategies'])]
 NUM_PRISONERS = 100
-RUNS = 10
+TIMEOUT = 15  # seconds
+RUN_TIME = 3  # seconds
 
 
 class LightBulb:
@@ -10,9 +18,12 @@ class LightBulb:
     def on(self):
         return self.__on
 
-    @on.setter
+    @on.setter                          # GUARD THIS
     def on(self, value):
-        self.__on = value
+        if isinstance(value, bool):
+            self.__on = value
+        else:
+            raise TypeError('LightBulb can only receive bool values')
 
 
 class Prisoner:
@@ -32,18 +43,23 @@ class Prisoner:
 class Simulation:
     __visited = set()
 
-    def __init__(self, prisoner_class, mod):
-        self.__prisoner_class = prisoner_class
+    def __init__(self, mod):
         self.__mod = mod
         self.__run_times = []
+        self.__runs = 0
+        self.__alive = True
 
     @property
     def run_times(self):
         return max(self.__run_times) / 365.25, min(self.__run_times) / 365.25,\
                (sum(self.__run_times) / len(self.__run_times)) / 365.25
 
+    @property
+    def runs(self):
+        return self.__runs
+
     @staticmethod
-    def solved():
+    def solved():  # Measures __visited set to total number of prisoners
         if len(Simulation.__visited) == NUM_PRISONERS:
             return True
         else:
@@ -51,30 +67,51 @@ class Simulation:
 
     def simulate(self):
 
-        from random import choice
-
         # build list
         prisoners = []
-        for i in range(NUM_PRISONERS):
-            prisoners.append(self.__mod.Prisoner(i))
+        try:
+            for i in range(NUM_PRISONERS):
+                prisoners.append(self.__mod.Prisoner(i))  # STRATEGY - GUARD THIS
+        except:
+            self.__alive = False
+            raise RuntimeError('Error occurred while building the prisoners list')
 
         # simulate
         light_bulb = LightBulb()
         days = 0
         victorious = False
-        while not victorious:
+        while self.__alive and not victorious:
             prisoner = choice(prisoners)
             Simulation.__visited.add(prisoner.pid)
-            victorious = prisoner.visit(light_bulb, days)
-            days += 1
+            victorious = prisoner.visit(light_bulb, days)  # STRATEGY - GUARD THIS
+            if isinstance(victorious, bool):
+                days += 1
+            else:
+                self.__alive = False
+                raise TypeError('Visit can only return bool value')
 
-        # check if actually solved before assigning
+        # check if solved
         if self.solved():
             self.__run_times.append(days)
         else:
-            print('A test failed.')
-            exit()
+            self.__alive = False
+
+        # add to runs and clear visited set
+        self.__runs += 1
+        Simulation.__visited.clear()
 
     def run(self):
-        for i in range(RUNS):
-            self.simulate()
+        start = time.time()
+        while (time.time() - start) < RUN_TIME and self.__alive:
+            thread = threading.Thread(target=self.simulate)
+            thread.start()
+            if self.__runs == 0:
+                thread.join(timeout=TIMEOUT)
+                if thread.is_alive():
+                    self.__alive = False
+                    raise TimeoutError('Strategy took longer than allowed')
+            else:
+                thread.join()
+        if not self.__alive:
+            print('\n\tSTRATEGY FAILED')
+            exit()
