@@ -2,6 +2,7 @@ from pkgutil import iter_modules
 from random import choice
 import threading
 import time
+import sys
 
 # generates available strategies for argparse choices
 STRATEGIES = [mod[1] for mod in iter_modules(['strategies'])]
@@ -83,7 +84,10 @@ class Simulation:
         while self.__alive and not victorious:
             prisoner = choice(prisoners)
             Simulation.__visited.add(prisoner.pid)
-            victorious = prisoner.visit(light_bulb, days)  # STRATEGY - GUARD THIS
+            try:
+                victorious = prisoner.visit(light_bulb, days)  # STRATEGY - GUARD THIS
+            except:
+                print("Error in the strategy's visit: {}".format(sys.exc_info()[0]))
             if isinstance(victorious, bool):
                 days += 1
             else:
