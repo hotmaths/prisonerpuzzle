@@ -2,14 +2,28 @@ import math
 import prisonerlib
 
 
+NAME = 'Doubler'
+
+INFO = """
+All prisoners start with a value of 1.
+
+A light bulb is worth 1 point, 2 points, 4 points,...32 points, in 500 day
+windows.  A prisoner can give points by turning on the light bulb or take
+points by turning it off.
+
+Generally, a prisoner tries to:
+- Take points if it will cause them to have a value that's a power of two
+- Take points if they have a value > 50
+- Give points if they can give all their points
+- Give points if they don't have a value that's a power of two
+
+When a prisoner gets a value of 100, he can declare victory.
+""".strip()
+
+
 CYCLES = int(math.log2(prisonerlib.NUM_PRISONERS))
 MAX_DOUBLE = 2 ** CYCLES
 WINDOW = 5 * prisonerlib.NUM_PRISONERS
-
-
-print('CYCLES', CYCLES)
-print('MAX_DOUBLE', MAX_DOUBLE)
-print('WINDOW', WINDOW)
 
 
 def day_value(day):
@@ -22,7 +36,7 @@ class Prisoner(prisonerlib.Prisoner):
         self.__value = 1
 
     def __is_boss(self):
-        return self.__value >= MAX_DOUBLE
+        return self.__value > prisonerlib.NUM_PRISONERS / 2
 
     def __is_double(self):
         return self.__value and not math.log2(self.__value) % 1
