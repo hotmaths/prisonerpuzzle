@@ -19,7 +19,7 @@ class LightBulb:
     def on(self):
         return self.__on
 
-    @on.setter                          # GUARD THIS
+    @on.setter
     def on(self, value):
         if isinstance(value, bool):
             self.__on = value
@@ -72,7 +72,7 @@ class Simulation:
         prisoners = []
         try:
             for i in range(NUM_PRISONERS):
-                prisoners.append(self.__mod.Prisoner(i))  # STRATEGY - GUARD THIS
+                prisoners.append(self.__mod.Prisoner(i))  # STRATEGY
         except:
             self.__alive = False
             raise RuntimeError('Error occurred while building the prisoners list')
@@ -85,7 +85,7 @@ class Simulation:
             prisoner = choice(prisoners)
             Simulation.__visited.add(prisoner.pid)
             try:
-                victorious = prisoner.visit(light_bulb, days)  # STRATEGY - GUARD THIS
+                victorious = prisoner.visit(light_bulb, days)  # STRATEGY
             except:
                 print("Error in the strategy's visit: {}".format(sys.exc_info()[0]))
             if isinstance(victorious, bool):
